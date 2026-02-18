@@ -1,0 +1,6 @@
+@wine_club_api_HostAddress = http://localhost:5065
+
+GET {{wine_club_api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
