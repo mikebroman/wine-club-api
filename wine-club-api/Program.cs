@@ -6,16 +6,18 @@ using WineClubApi.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+
 // Add services to the container.
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<WineClubDbContext>(options =>
 {
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IUserContext, HeaderUserContext>();
+builder.Services.AddScoped<HeaderUserContext, HeaderUserContext>();
 
 builder.Services.AddScoped<IMeRepository, MeRepository>();
 builder.Services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();

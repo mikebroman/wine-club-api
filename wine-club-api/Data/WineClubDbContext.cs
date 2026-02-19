@@ -42,6 +42,12 @@ public sealed class WineClubDbContext(DbContextOptions<WineClubDbContext> option
             .HasIndex(x => new { x.EventId, x.ResponsibilityType })
             .IsUnique();
 
+        modelBuilder.Entity<EventResponsibility>()
+            .HasOne(x => x.Household)
+            .WithMany(x => x.EventResponsibilities)
+            .HasForeignKey(x => x.HouseholdId)
+            .OnDelete(DeleteBehavior.NoAction);
+
         modelBuilder.Entity<Bottle>()
             .HasIndex(x => x.EventId);
 
