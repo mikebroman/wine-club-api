@@ -1,23 +1,21 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WineClubApi.Api;
 using WineClubApi.Api.V1.Dtos;
-using WineClubApi.Data;
 using WineClubApi.Data.Repositories;
 
 namespace WineClubApi.Controllers.V1;
 
 [ApiController]
 [Route("api/v1/announcements")]
+[Authorize]
 public sealed class AnnouncementsController(
     IUserContext userContext,
-    WineClubDbContext db,
     IAnnouncementRepository announcementRepository) : ControllerBase
 {
     [HttpGet("current")]
     public async Task<IActionResult> GetCurrent([FromQuery] string? include, CancellationToken cancellationToken)
     {
-        await UserAccountSeeder.EnsureUserAccountExistsAsync(db, userContext.UserAccountId, cancellationToken);
-
         var result = await announcementRepository.GetCurrentAsync(
             userContext.UserAccountId,
             new IncludeOptions(include ?? string.Empty),
@@ -33,8 +31,6 @@ public sealed class AnnouncementsController(
         [FromBody] UpsertAnnouncementReactionRequest request,
         CancellationToken cancellationToken)
     {
-        await UserAccountSeeder.EnsureUserAccountExistsAsync(db, userContext.UserAccountId, cancellationToken);
-
         var result = await announcementRepository.SetMyReactionAsync(
             userContext.UserAccountId,
             announcementId,

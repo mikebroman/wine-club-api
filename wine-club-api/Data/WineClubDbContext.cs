@@ -10,6 +10,8 @@ public sealed class WineClubDbContext(DbContextOptions<WineClubDbContext> option
     public DbSet<UserAccount> UserAccounts => Set<UserAccount>();
     public DbSet<HouseholdMember> HouseholdMembers => Set<HouseholdMember>();
 
+    public DbSet<LoginInvite> LoginInvites => Set<LoginInvite>();
+
     public DbSet<Event> Events => Set<Event>();
     public DbSet<EventResponsibility> EventResponsibilities => Set<EventResponsibility>();
     public DbSet<EventRsvp> EventRsvps => Set<EventRsvp>();
@@ -26,6 +28,10 @@ public sealed class WineClubDbContext(DbContextOptions<WineClubDbContext> option
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<LoginInvite>()
+            .HasIndex(x => x.Email)
+            .IsUnique();
 
         modelBuilder.Entity<UserAccount>()
             .HasIndex(x => new { x.Provider, x.ProviderSubject })

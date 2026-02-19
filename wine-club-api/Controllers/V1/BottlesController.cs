@@ -1,16 +1,16 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WineClubApi.Api;
 using WineClubApi.Api.V1.Dtos;
-using WineClubApi.Data;
 using WineClubApi.Data.Repositories;
 
 namespace WineClubApi.Controllers.V1;
 
 [ApiController]
 [Route("api/v1/bottles")]
+[Authorize]
 public sealed class BottlesController(
     IUserContext userContext,
-    WineClubDbContext db,
     IBottleRepository bottleRepository) : ControllerBase
 {
     [HttpGet]
@@ -37,8 +37,6 @@ public sealed class BottlesController(
     [HttpGet("{bottleId:long}")]
     public async Task<IActionResult> GetById([FromRoute] long bottleId, [FromQuery] string? include, CancellationToken cancellationToken)
     {
-        await UserAccountSeeder.EnsureUserAccountExistsAsync(db, userContext.UserAccountId, cancellationToken);
-
         var includeOptions = new IncludeOptions(include ?? string.Empty);
         var similarLimit = 3;
 
@@ -58,8 +56,6 @@ public sealed class BottlesController(
         [FromBody] UpdateMyRatingRequest request,
         CancellationToken cancellationToken)
     {
-        await UserAccountSeeder.EnsureUserAccountExistsAsync(db, userContext.UserAccountId, cancellationToken);
-
         var result = await bottleRepository.SetMyRatingAsync(userContext.UserAccountId, bottleId, request.Rating, cancellationToken);
         return Ok(result);
     }
@@ -70,8 +66,6 @@ public sealed class BottlesController(
         [FromBody] UpdateMyNoteRequest request,
         CancellationToken cancellationToken)
     {
-        await UserAccountSeeder.EnsureUserAccountExistsAsync(db, userContext.UserAccountId, cancellationToken);
-
         var result = await bottleRepository.SetMyNoteAsync(userContext.UserAccountId, bottleId, request.Note, cancellationToken);
         return Ok(result);
     }
@@ -83,8 +77,6 @@ public sealed class BottlesController(
         [FromForm] IFormFile file,
         CancellationToken cancellationToken)
     {
-        await UserAccountSeeder.EnsureUserAccountExistsAsync(db, userContext.UserAccountId, cancellationToken);
-
         var result = await bottleRepository.SavePhotoAsync(bottleId, file, cancellationToken);
         return Ok(result);
     }

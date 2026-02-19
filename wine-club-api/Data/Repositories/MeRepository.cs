@@ -9,7 +9,7 @@ public sealed class MeRepository(WineClubDbContext db) : IMeRepository
     {
         var me = await db.UserAccounts
             .Where(x => x.Id == userAccountId)
-            .Select(x => new MeResponse(x.Id, x.Email, x.DisplayName))
+            .Select(x => new MeResponse(x.Id, x.Email, x.DisplayName, x.PictureUrl))
             .SingleOrDefaultAsync(cancellationToken);
 
         return me ?? throw new InvalidOperationException($"UserAccount {userAccountId} not found.");
@@ -19,7 +19,7 @@ public sealed class MeRepository(WineClubDbContext db) : IMeRepository
     {
         var me = await db.UserAccounts
             .Where(x => x.Id == userAccountId)
-            .Select(x => new MeProfileResponse(x.Email, x.DisplayName))
+            .Select(x => new MeProfileResponse(x.Email, x.DisplayName, x.PictureUrl))
             .SingleOrDefaultAsync(cancellationToken);
 
         return me ?? throw new InvalidOperationException($"UserAccount {userAccountId} not found.");
