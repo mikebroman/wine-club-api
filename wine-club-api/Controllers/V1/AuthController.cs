@@ -15,6 +15,12 @@ namespace WineClubApi.Controllers.V1;
 [Route("api/v1/auth")]
 public sealed class AuthController(IConfiguration configuration, WineClubDbContext db) : ControllerBase
 {
+    [HttpGet("unauthorized")]
+    public IActionResult UnauthorizedTest()
+    {
+        return Unauthorized(new { message = "Unauthorized" });
+    }
+
     [HttpPost("google")]
     public async Task<IActionResult> Google([FromBody] GoogleAuthRequest? request, CancellationToken cancellationToken)
     {
