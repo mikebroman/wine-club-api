@@ -12,7 +12,7 @@ using WineClubApi.Data;
 namespace wine_club_api.Migrations
 {
     [DbContext(typeof(WineClubDbContext))]
-    [Migration("20260219053046_Init")]
+    [Migration("20260301170204_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -424,6 +424,32 @@ namespace wine_club_api.Migrations
                     b.ToTable("HouseholdMembers");
                 });
 
+            modelBuilder.Entity("WineClubApi.Data.Entities.LoginInvite", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("LoginInvites");
+                });
+
             modelBuilder.Entity("WineClubApi.Data.Entities.UserAccount", b =>
                 {
                     b.Property<long>("Id")
@@ -445,6 +471,9 @@ namespace wine_club_api.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<string>("PictureUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Provider")
                         .IsRequired()

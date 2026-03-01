@@ -40,6 +40,23 @@ namespace wine_club_api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "LoginInvites",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Email = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LoginInvites", x => x.Id);
+                });
+
+            migrationBuilder.Sql(@"INSERT INTO LoginInvites (Email, IsActive, CreatedUtc) VALUES ('mikebroman2@gmail.com', 1, GETUTCDATE())");
+
+            migrationBuilder.CreateTable(
                 name: "UserAccounts",
                 columns: table => new
                 {
@@ -49,6 +66,7 @@ namespace wine_club_api.Migrations
                     ProviderSubject = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DisplayName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PictureUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -473,6 +491,12 @@ namespace wine_club_api.Migrations
                 column: "ClubId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_LoginInvites_Email",
+                table: "LoginInvites",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserAccounts_Provider_ProviderSubject",
                 table: "UserAccounts",
                 columns: new[] { "Provider", "ProviderSubject" },
@@ -502,6 +526,9 @@ namespace wine_club_api.Migrations
 
             migrationBuilder.DropTable(
                 name: "HouseholdMembers");
+
+            migrationBuilder.DropTable(
+                name: "LoginInvites");
 
             migrationBuilder.DropTable(
                 name: "Announcements");

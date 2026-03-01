@@ -22,6 +22,405 @@ namespace wine_club_api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("WineClubApi.Data.Entities.Announcement", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AuthorUserAccountId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("ClubId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorUserAccountId");
+
+                    b.HasIndex("ClubId");
+
+                    b.ToTable("Announcements");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.AnnouncementReaction", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AnnouncementId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Emoji")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<long>("UserAccountId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnnouncementId");
+
+                    b.HasIndex("UserAccountId");
+
+                    b.HasIndex("AnnouncementId", "UserAccountId", "Emoji")
+                        .IsUnique();
+
+                    b.ToTable("AnnouncementReactions");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.Bottle", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("BroughtByHouseholdId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("EventId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Producer")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Region")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VintageLabel")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WineType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BroughtByHouseholdId");
+
+                    b.HasIndex("EventId");
+
+                    b.ToTable("Bottles");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.BottleNote", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("BottleId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("UserAccountId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BottleId");
+
+                    b.HasIndex("UserAccountId");
+
+                    b.ToTable("BottleNotes");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.BottleRating", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("BottleId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Rating")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("UserAccountId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BottleId");
+
+                    b.HasIndex("UserAccountId");
+
+                    b.HasIndex("BottleId", "UserAccountId")
+                        .IsUnique();
+
+                    b.ToTable("BottleRatings");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.BottleTag", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BottleTags");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.BottleTagMap", b =>
+                {
+                    b.Property<long>("BottleId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("BottleTagId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("BottleId", "BottleTagId");
+
+                    b.HasIndex("BottleTagId");
+
+                    b.ToTable("BottleTagMaps");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.Club", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TimeZone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Clubs");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.Event", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("ClubId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LocationName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartsAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Theme")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClubId");
+
+                    b.HasIndex("StartsAtUtc");
+
+                    b.ToTable("Events");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.EventResponsibility", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EventId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("HouseholdId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ResponsibilityType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HouseholdId");
+
+                    b.HasIndex("EventId", "ResponsibilityType")
+                        .IsUnique();
+
+                    b.ToTable("EventResponsibilities");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.EventRsvp", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("EventId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("RespondedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("UserAccountId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserAccountId");
+
+                    b.HasIndex("EventId", "UserAccountId")
+                        .IsUnique();
+
+                    b.ToTable("EventRsvps");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.Household", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ClubId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClubId");
+
+                    b.ToTable("Households");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.HouseholdMember", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("HouseholdId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("JoinedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("MembershipRole")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("UserAccountId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HouseholdId");
+
+                    b.HasIndex("UserAccountId");
+
+                    b.ToTable("HouseholdMembers");
+                });
+
             modelBuilder.Entity("WineClubApi.Data.Entities.LoginInvite", b =>
                 {
                     b.Property<long>("Id")
@@ -45,7 +444,7 @@ namespace wine_club_api.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("LoginInvites", (string)null);
+                    b.ToTable("LoginInvites");
                 });
 
             modelBuilder.Entity("WineClubApi.Data.Entities.UserAccount", b =>
@@ -86,7 +485,260 @@ namespace wine_club_api.Migrations
                     b.HasIndex("Provider", "ProviderSubject")
                         .IsUnique();
 
-                    b.ToTable("UserAccounts", (string)null);
+                    b.ToTable("UserAccounts");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.Announcement", b =>
+                {
+                    b.HasOne("WineClubApi.Data.Entities.UserAccount", "AuthorUserAccount")
+                        .WithMany("AuthoredAnnouncements")
+                        .HasForeignKey("AuthorUserAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("WineClubApi.Data.Entities.Club", "Club")
+                        .WithMany("Announcements")
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AuthorUserAccount");
+
+                    b.Navigation("Club");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.AnnouncementReaction", b =>
+                {
+                    b.HasOne("WineClubApi.Data.Entities.Announcement", "Announcement")
+                        .WithMany("Reactions")
+                        .HasForeignKey("AnnouncementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WineClubApi.Data.Entities.UserAccount", "UserAccount")
+                        .WithMany("AnnouncementReactions")
+                        .HasForeignKey("UserAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Announcement");
+
+                    b.Navigation("UserAccount");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.Bottle", b =>
+                {
+                    b.HasOne("WineClubApi.Data.Entities.Household", "BroughtByHousehold")
+                        .WithMany("BottlesBrought")
+                        .HasForeignKey("BroughtByHouseholdId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("WineClubApi.Data.Entities.Event", "Event")
+                        .WithMany("Bottles")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BroughtByHousehold");
+
+                    b.Navigation("Event");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.BottleNote", b =>
+                {
+                    b.HasOne("WineClubApi.Data.Entities.Bottle", "Bottle")
+                        .WithMany("Notes")
+                        .HasForeignKey("BottleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WineClubApi.Data.Entities.UserAccount", "UserAccount")
+                        .WithMany("BottleNotes")
+                        .HasForeignKey("UserAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bottle");
+
+                    b.Navigation("UserAccount");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.BottleRating", b =>
+                {
+                    b.HasOne("WineClubApi.Data.Entities.Bottle", "Bottle")
+                        .WithMany("Ratings")
+                        .HasForeignKey("BottleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WineClubApi.Data.Entities.UserAccount", "UserAccount")
+                        .WithMany("BottleRatings")
+                        .HasForeignKey("UserAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bottle");
+
+                    b.Navigation("UserAccount");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.BottleTagMap", b =>
+                {
+                    b.HasOne("WineClubApi.Data.Entities.Bottle", "Bottle")
+                        .WithMany("TagMaps")
+                        .HasForeignKey("BottleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WineClubApi.Data.Entities.BottleTag", "BottleTag")
+                        .WithMany("BottleMaps")
+                        .HasForeignKey("BottleTagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bottle");
+
+                    b.Navigation("BottleTag");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.Event", b =>
+                {
+                    b.HasOne("WineClubApi.Data.Entities.Club", "Club")
+                        .WithMany("Events")
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Club");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.EventResponsibility", b =>
+                {
+                    b.HasOne("WineClubApi.Data.Entities.Event", "Event")
+                        .WithMany("Responsibilities")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WineClubApi.Data.Entities.Household", "Household")
+                        .WithMany("EventResponsibilities")
+                        .HasForeignKey("HouseholdId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+
+                    b.Navigation("Household");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.EventRsvp", b =>
+                {
+                    b.HasOne("WineClubApi.Data.Entities.Event", "Event")
+                        .WithMany("Rsvps")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WineClubApi.Data.Entities.UserAccount", "UserAccount")
+                        .WithMany("EventRsvps")
+                        .HasForeignKey("UserAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+
+                    b.Navigation("UserAccount");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.Household", b =>
+                {
+                    b.HasOne("WineClubApi.Data.Entities.Club", "Club")
+                        .WithMany("Households")
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Club");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.HouseholdMember", b =>
+                {
+                    b.HasOne("WineClubApi.Data.Entities.Household", "Household")
+                        .WithMany("Members")
+                        .HasForeignKey("HouseholdId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WineClubApi.Data.Entities.UserAccount", "UserAccount")
+                        .WithMany("HouseholdMemberships")
+                        .HasForeignKey("UserAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Household");
+
+                    b.Navigation("UserAccount");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.Announcement", b =>
+                {
+                    b.Navigation("Reactions");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.Bottle", b =>
+                {
+                    b.Navigation("Notes");
+
+                    b.Navigation("Ratings");
+
+                    b.Navigation("TagMaps");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.BottleTag", b =>
+                {
+                    b.Navigation("BottleMaps");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.Club", b =>
+                {
+                    b.Navigation("Announcements");
+
+                    b.Navigation("Events");
+
+                    b.Navigation("Households");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.Event", b =>
+                {
+                    b.Navigation("Bottles");
+
+                    b.Navigation("Responsibilities");
+
+                    b.Navigation("Rsvps");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.Household", b =>
+                {
+                    b.Navigation("BottlesBrought");
+
+                    b.Navigation("EventResponsibilities");
+
+                    b.Navigation("Members");
+                });
+
+            modelBuilder.Entity("WineClubApi.Data.Entities.UserAccount", b =>
+                {
+                    b.Navigation("AnnouncementReactions");
+
+                    b.Navigation("AuthoredAnnouncements");
+
+                    b.Navigation("BottleNotes");
+
+                    b.Navigation("BottleRatings");
+
+                    b.Navigation("EventRsvps");
+
+                    b.Navigation("HouseholdMemberships");
                 });
 #pragma warning restore 612, 618
         }
