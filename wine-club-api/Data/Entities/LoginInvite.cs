@@ -8,5 +8,9 @@ public sealed class LoginInvite
 
     public bool IsActive { get; set; } = true;
 
+    public long ClubId { get; set; }
+
     public DateTime CreatedUtc { get; set; }
+
+    public Club Club { get; set; } = null!;
 }

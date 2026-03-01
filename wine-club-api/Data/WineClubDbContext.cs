@@ -33,9 +33,21 @@ public sealed class WineClubDbContext(DbContextOptions<WineClubDbContext> option
             .HasIndex(x => x.Email)
             .IsUnique();
 
+        modelBuilder.Entity<LoginInvite>()
+            .HasOne(x => x.Club)
+            .WithMany(x => x.LoginInvites)
+            .HasForeignKey(x => x.ClubId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<UserAccount>()
             .HasIndex(x => new { x.Provider, x.ProviderSubject })
             .IsUnique();
+
+        modelBuilder.Entity<UserAccount>()
+            .HasOne(x => x.Club)
+            .WithMany(x => x.UserAccounts)
+            .HasForeignKey(x => x.ClubId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Event>()
             .HasIndex(x => x.StartsAtUtc);

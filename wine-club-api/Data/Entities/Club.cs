@@ -6,8 +6,9 @@ public sealed class Club
     public string Name { get; set; } = string.Empty;
     public string TimeZone { get; set; } = string.Empty;
     public DateTime CreatedUtc { get; set; }
-
     public List<Household> Households { get; set; } = [];
     public List<Event> Events { get; set; } = [];
     public List<Announcement> Announcements { get; set; } = [];
+    public List<LoginInvite> LoginInvites { get; set; } = []; 
+    public List<UserAccount> UserAccounts { get; set; } = [];
 }

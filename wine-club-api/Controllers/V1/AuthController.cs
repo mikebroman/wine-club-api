@@ -60,9 +60,9 @@ public sealed class AuthController(IConfiguration configuration, WineClubDbConte
 
         var email = payload.Email;
 
-        var invited = await db.LoginInvites.AnyAsync(x => x.Email == email && x.IsActive, cancellationToken);
-        var allowlisted = IsAllowlistedByConfig(email);
-        if (!invited && !allowlisted)
+        var invitation = await db.LoginInvites.FirstOrDefaultAsync(x => x.Email == email && x.IsActive, cancellationToken);
+        
+        if (invitation == null)
         {
             return StatusCode(StatusCodes.Status403Forbidden, new { message = "Not authorized" });
         }
@@ -88,6 +88,7 @@ public sealed class AuthController(IConfiguration configuration, WineClubDbConte
                     DisplayName = payload.Name ?? string.Empty,
                     PictureUrl = payload.Picture,
                     IsActive = true,
+                    ClubId = invitation.ClubId,
                     CreatedUtc = DateTime.UtcNow,
                 };
 
@@ -111,20 +112,6 @@ public sealed class AuthController(IConfiguration configuration, WineClubDbConte
         var me = new MeResponse(user.Id, user.Email, user.DisplayName, user.PictureUrl);
 
         return Ok(new AuthResponse(accessToken, me));
-
-        bool IsAllowlistedByConfig(string loginEmail)
-        {
-            var allowlist = configuration["AUTH_ALLOWLIST_EMAILS"];
-            if (string.IsNullOrWhiteSpace(allowlist))
-            {
-                return false;
-            }
-
-            var allowed = allowlist
-                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-            return allowed.Any(x => string.Equals(x, loginEmail, StringComparison.OrdinalIgnoreCase));
-        }
     }
 
     private string CreateAccessToken(UserAccount user)

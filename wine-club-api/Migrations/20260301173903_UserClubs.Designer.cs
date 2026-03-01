@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WineClubApi.Data;
 
@@ -11,9 +12,11 @@ using WineClubApi.Data;
 namespace wine_club_api.Migrations
 {
     [DbContext(typeof(WineClubDbContext))]
-    partial class WineClubDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260301173903_UserClubs")]
+    partial class UserClubs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
