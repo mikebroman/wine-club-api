@@ -2,9 +2,11 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Google.Apis.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using WineClubApi.Api;
 using WineClubApi.Api.V1.Dtos;
 using WineClubApi.Data;
 using WineClubApi.Data.Entities;
@@ -114,6 +116,46 @@ public sealed class AuthController(IConfiguration configuration, WineClubDbConte
         return Ok(new AuthResponse(accessToken, me));
     }
 
+    [Authorize]
+    [HttpPost("switch-club")]
+    public async Task<IActionResult> SwitchClub(
+        [FromBody] SwitchClubRequest? request,
+        [FromServices] IUserContext userContext,
+        CancellationToken cancellationToken)
+    {
+        if (request is null || request.ClubId <= 0)
+        {
+            return BadRequest(new { message = "Missing clubId" });
+        }
+
+        var user = await db.UserAccounts
+            .Where(x => x.Id == userContext.UserAccountId)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (user is null)
+        {
+            return Unauthorized(new { message = "Unauthorized" });
+        }
+
+        var hasMembership = await db.HouseholdMembers
+            .AnyAsync(
+                x => x.UserAccountId == user.Id && x.Household.ClubId == request.ClubId && x.Household.IsActive,
+                cancellationToken);
+
+        if (!hasMembership)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { message = "Not authorized" });
+        }
+
+        user.ClubId = request.ClubId;
+        await db.SaveChangesAsync(cancellationToken);
+
+        var accessToken = CreateAccessToken(user);
+        var me = new MeResponse(user.Id, user.Email, user.DisplayName, user.PictureUrl);
+
+        return Ok(new AuthResponse(accessToken, me));
+    }
+
     private string CreateAccessToken(UserAccount user)
     {
         var signingKey = configuration["JWT_SIGNING_KEY"];
@@ -132,6 +174,7 @@ public sealed class AuthController(IConfiguration configuration, WineClubDbConte
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email),
+            new("clubId", user.ClubId.ToString()),
         };
 
         var token = new JwtSecurityToken(

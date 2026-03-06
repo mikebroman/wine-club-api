@@ -18,6 +18,7 @@ public sealed class AnnouncementsController(
     {
         var result = await announcementRepository.GetCurrentAsync(
             userContext.UserAccountId,
+            userContext.ClubId,
             new IncludeOptions(include ?? string.Empty),
             cancellationToken);
 
@@ -31,13 +32,21 @@ public sealed class AnnouncementsController(
         [FromBody] UpsertAnnouncementReactionRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await announcementRepository.SetMyReactionAsync(
-            userContext.UserAccountId,
-            announcementId,
-            emoji,
-            request.Active,
-            cancellationToken);
+        try
+        {
+            var result = await announcementRepository.SetMyReactionAsync(
+                userContext.UserAccountId,
+                userContext.ClubId,
+                announcementId,
+                emoji,
+                request.Active,
+                cancellationToken);
 
-        return Ok(result);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
     }
 }

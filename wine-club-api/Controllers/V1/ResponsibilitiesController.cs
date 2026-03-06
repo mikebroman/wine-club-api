@@ -1,16 +1,26 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WineClubApi.Api;
 using WineClubApi.Data.Repositories;
 
 namespace WineClubApi.Controllers.V1;
 
 [ApiController]
 [Route("api/v1/responsibilities")]
-public sealed class ResponsibilitiesController(IResponsibilityRepository responsibilityRepository) : ControllerBase
+[Authorize]
+public sealed class ResponsibilitiesController(IUserContext userContext, IResponsibilityRepository responsibilityRepository) : ControllerBase
 {
     [HttpGet("upcoming")]
     public async Task<IActionResult> GetUpcoming([FromQuery] long householdId, [FromQuery] int limit = 6, CancellationToken cancellationToken = default)
     {
-        var result = await responsibilityRepository.GetUpcomingAsync(householdId, limit, cancellationToken);
-        return Ok(result);
+        try
+        {
+            var result = await responsibilityRepository.GetUpcomingAsync(userContext.UserAccountId, userContext.ClubId, householdId, limit, cancellationToken);
+            return Ok(result);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
     }
 }

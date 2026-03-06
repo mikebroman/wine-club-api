@@ -5,11 +5,21 @@ namespace WineClubApi.Data.Repositories;
 
 public sealed class ResponsibilityRepository(WineClubDbContext db) : IResponsibilityRepository
 {
-    public async Task<IReadOnlyList<UpcomingResponsibilityItem>> GetUpcomingAsync(long householdId, int limit, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<UpcomingResponsibilityItem>> GetUpcomingAsync(long userAccountId, long clubId, long householdId, int limit, CancellationToken cancellationToken)
     {
         if (limit <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(limit));
+        }
+
+        var hasMembership = await db.HouseholdMembers
+            .AnyAsync(
+                x => x.UserAccountId == userAccountId && x.HouseholdId == householdId && x.Household.ClubId == clubId,
+                cancellationToken);
+
+        if (!hasMembership)
+        {
+            throw new UnauthorizedAccessException("Not authorized for this household.");
         }
 
         return await db.EventResponsibilities
@@ -19,6 +29,7 @@ public sealed class ResponsibilityRepository(WineClubDbContext db) : IResponsibi
                 r => r.EventId,
                 e => e.Id,
                 (r, e) => new { r, e })
+            .Where(x => x.e.ClubId == clubId)
             .Where(x => x.e.StartsAtUtc >= DateTime.UtcNow)
             .OrderBy(x => x.e.StartsAtUtc)
             .Select(x => new UpcomingResponsibilityItem(x.e.Id, x.e.Title, x.e.StartsAtUtc, x.r.ResponsibilityType))

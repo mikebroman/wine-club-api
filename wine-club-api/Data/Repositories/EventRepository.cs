@@ -6,25 +6,33 @@ namespace WineClubApi.Data.Repositories;
 
 public sealed class EventRepository(WineClubDbContext db) : IEventRepository
 {
-    public Task<EventResponse?> GetNextAsync(long userAccountId, IncludeOptions include, CancellationToken cancellationToken) =>
+    public Task<EventResponse?> GetNextAsync(long userAccountId, long clubId, IncludeOptions include, CancellationToken cancellationToken) =>
         GetSingleAsync(
             userAccountId,
+            clubId,
             include,
             q => q.OrderBy(x => x.StartsAtUtc).Where(x => x.StartsAtUtc >= DateTime.UtcNow),
             cancellationToken);
 
-    public Task<EventResponse?> GetByIdAsync(long userAccountId, long eventId, IncludeOptions include, CancellationToken cancellationToken) =>
+    public Task<EventResponse?> GetByIdAsync(long userAccountId, long clubId, long eventId, IncludeOptions include, CancellationToken cancellationToken) =>
         GetSingleAsync(
             userAccountId,
+            clubId,
             include,
             q => q.Where(x => x.Id == eventId),
             cancellationToken);
 
-    public async Task<UpdateMyRsvpResponse> SetMyRsvpAsync(long userAccountId, long eventId, string status, CancellationToken cancellationToken)
+    public async Task<UpdateMyRsvpResponse> SetMyRsvpAsync(long userAccountId, long clubId, long eventId, string status, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(status))
         {
             throw new ArgumentException("Status is required.", nameof(status));
+        }
+
+        var eventExists = await db.Events.AnyAsync(x => x.Id == eventId && x.ClubId == clubId, cancellationToken);
+        if (!eventExists)
+        {
+            throw new KeyNotFoundException($"Event {eventId} not found.");
         }
 
         var normalized = status.Trim().ToLowerInvariant();
@@ -67,11 +75,12 @@ public sealed class EventRepository(WineClubDbContext db) : IEventRepository
 
     private async Task<EventResponse?> GetSingleAsync(
         long userAccountId,
+        long clubId,
         IncludeOptions include,
         Func<IQueryable<Event>, IQueryable<Event>> apply,
         CancellationToken cancellationToken)
     {
-        var evt = await apply(db.Events).Select(x => new
+        var evt = await apply(db.Events.Where(x => x.ClubId == clubId)).Select(x => new
             {
                 x.Id,
                 x.Title,

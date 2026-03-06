@@ -6,9 +6,10 @@ namespace WineClubApi.Data.Repositories;
 
 public sealed class AnnouncementRepository(WineClubDbContext db) : IAnnouncementRepository
 {
-    public async Task<CurrentAnnouncementResponse?> GetCurrentAsync(long userAccountId, IncludeOptions include, CancellationToken cancellationToken)
+    public async Task<CurrentAnnouncementResponse?> GetCurrentAsync(long userAccountId, long clubId, IncludeOptions include, CancellationToken cancellationToken)
     {
         var announcement = await db.Announcements
+            .Where(x => x.ClubId == clubId)
             .OrderByDescending(x => x.CreatedUtc)
             .Select(x => new
             {
@@ -57,6 +58,7 @@ public sealed class AnnouncementRepository(WineClubDbContext db) : IAnnouncement
 
     public async Task<AnnouncementReactionStripResponse> SetMyReactionAsync(
         long userAccountId,
+        long clubId,
         long announcementId,
         string emoji,
         bool active,
@@ -65,6 +67,13 @@ public sealed class AnnouncementRepository(WineClubDbContext db) : IAnnouncement
         if (string.IsNullOrWhiteSpace(emoji))
         {
             throw new ArgumentException("Emoji is required.", nameof(emoji));
+        }
+
+        var announcementExists = await db.Announcements
+            .AnyAsync(x => x.Id == announcementId && x.ClubId == clubId, cancellationToken);
+        if (!announcementExists)
+        {
+            throw new KeyNotFoundException($"Announcement {announcementId} not found.");
         }
 
         var existing = await db.AnnouncementReactions

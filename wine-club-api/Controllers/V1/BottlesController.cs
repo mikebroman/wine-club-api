@@ -28,6 +28,7 @@ public sealed class BottlesController(
             : BottleSort.Recent;
 
         var result = await bottleRepository.GetListAsync(
+            userContext.ClubId,
             new BottleListQuery(parsedSort, limit, filter, q, page, pageSize),
             cancellationToken);
 
@@ -42,6 +43,7 @@ public sealed class BottlesController(
 
         var result = await bottleRepository.GetByIdAsync(
             userContext.UserAccountId,
+            userContext.ClubId,
             bottleId,
             includeOptions,
             similarLimit,
@@ -56,8 +58,15 @@ public sealed class BottlesController(
         [FromBody] UpdateMyRatingRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await bottleRepository.SetMyRatingAsync(userContext.UserAccountId, bottleId, request.Rating, cancellationToken);
-        return Ok(result);
+        try
+        {
+            var result = await bottleRepository.SetMyRatingAsync(userContext.UserAccountId, userContext.ClubId, bottleId, request.Rating, cancellationToken);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
     }
 
     [HttpPut("{bottleId:long}/my-note")]
@@ -66,8 +75,15 @@ public sealed class BottlesController(
         [FromBody] UpdateMyNoteRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await bottleRepository.SetMyNoteAsync(userContext.UserAccountId, bottleId, request.Note, cancellationToken);
-        return Ok(result);
+        try
+        {
+            var result = await bottleRepository.SetMyNoteAsync(userContext.UserAccountId, userContext.ClubId, bottleId, request.Note, cancellationToken);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
     }
 
     [HttpPost("{bottleId:long}/photo")]
@@ -77,7 +93,14 @@ public sealed class BottlesController(
         [FromForm] IFormFile file,
         CancellationToken cancellationToken)
     {
-        var result = await bottleRepository.SavePhotoAsync(bottleId, file, cancellationToken);
-        return Ok(result);
+        try
+        {
+            var result = await bottleRepository.SavePhotoAsync(userContext.ClubId, bottleId, file, cancellationToken);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
     }
 }

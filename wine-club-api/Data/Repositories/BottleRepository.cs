@@ -6,9 +6,9 @@ namespace WineClubApi.Data.Repositories;
 
 public sealed class BottleRepository(WineClubDbContext db) : IBottleRepository
 {
-    public async Task<IReadOnlyList<BottleListItem>> GetListAsync(BottleListQuery query, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<BottleListItem>> GetListAsync(long clubId, BottleListQuery query, CancellationToken cancellationToken)
     {
-        IQueryable<Bottle> q = db.Bottles;
+        IQueryable<Bottle> q = db.Bottles.Where(x => x.Event.ClubId == clubId);
 
         if (!string.IsNullOrWhiteSpace(query.Q))
         {
@@ -59,10 +59,10 @@ public sealed class BottleRepository(WineClubDbContext db) : IBottleRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<BottleDetailsResponse?> GetByIdAsync(long userAccountId, long bottleId, IncludeOptions include, int similarLimit, CancellationToken cancellationToken)
+    public async Task<BottleDetailsResponse?> GetByIdAsync(long userAccountId, long clubId, long bottleId, IncludeOptions include, int similarLimit, CancellationToken cancellationToken)
     {
         var bottle = await db.Bottles
-            .Where(x => x.Id == bottleId)
+            .Where(x => x.Id == bottleId && x.Event.ClubId == clubId)
             .Select(x => new
             {
                 x.Id,
@@ -119,7 +119,7 @@ public sealed class BottleRepository(WineClubDbContext db) : IBottleRepository
         {
             var producer = bottle.Producer;
             similar = await db.Bottles
-                .Where(x => x.Id != bottleId && x.Producer == producer)
+                .Where(x => x.Event.ClubId == clubId && x.Id != bottleId && x.Producer == producer)
                 .OrderByDescending(x => x.CreatedUtc)
                 .Take(similarLimit)
                 .Select(x => new BottleListItem(x.Id, x.EventId, x.Producer, x.Name, x.VintageLabel, x.WineType, x.Region, x.ImageUrl))
@@ -141,12 +141,18 @@ public sealed class BottleRepository(WineClubDbContext db) : IBottleRepository
             similar);
     }
 
-    public async Task<UpdateMyRatingResponse> SetMyRatingAsync(long userAccountId, long bottleId, string? rating, CancellationToken cancellationToken)
+    public async Task<UpdateMyRatingResponse> SetMyRatingAsync(long userAccountId, long clubId, long bottleId, string? rating, CancellationToken cancellationToken)
     {
         var normalized = rating?.Trim().ToLowerInvariant();
         if (normalized is not (null or "love" or "like" or "meh"))
         {
             throw new ArgumentException("Invalid rating.", nameof(rating));
+        }
+
+        var bottleExists = await db.Bottles.AnyAsync(x => x.Id == bottleId && x.Event.ClubId == clubId, cancellationToken);
+        if (!bottleExists)
+        {
+            throw new KeyNotFoundException($"Bottle {bottleId} not found.");
         }
 
         var existing = await db.BottleRatings
@@ -191,11 +197,17 @@ public sealed class BottleRepository(WineClubDbContext db) : IBottleRepository
         return new UpdateMyRatingResponse(normalized, summary);
     }
 
-    public async Task<UpdateMyNoteResponse> SetMyNoteAsync(long userAccountId, long bottleId, string note, CancellationToken cancellationToken)
+    public async Task<UpdateMyNoteResponse> SetMyNoteAsync(long userAccountId, long clubId, long bottleId, string note, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(note))
         {
             throw new ArgumentException("Note is required.", nameof(note));
+        }
+
+        var bottleExists = await db.Bottles.AnyAsync(x => x.Id == bottleId && x.Event.ClubId == clubId, cancellationToken);
+        if (!bottleExists)
+        {
+            throw new KeyNotFoundException($"Bottle {bottleId} not found.");
         }
 
         var existing = await db.BottleNotes
@@ -220,9 +232,15 @@ public sealed class BottleRepository(WineClubDbContext db) : IBottleRepository
         return new UpdateMyNoteResponse(new BottleNoteItem(existing.Note, existing.CreatedUtc, existing.UpdatedUtc));
     }
 
-    public async Task<UploadBottlePhotoResponse> SavePhotoAsync(long bottleId, IFormFile file, CancellationToken cancellationToken)
+    public async Task<UploadBottlePhotoResponse> SavePhotoAsync(long clubId, long bottleId, IFormFile file, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(file);
+
+        var bottleExists = await db.Bottles.AnyAsync(x => x.Id == bottleId && x.Event.ClubId == clubId, cancellationToken);
+        if (!bottleExists)
+        {
+            throw new KeyNotFoundException($"Bottle {bottleId} not found.");
+        }
 
         var ext = Path.GetExtension(file.FileName);
         if (string.IsNullOrWhiteSpace(ext) || ext.Length > 8)

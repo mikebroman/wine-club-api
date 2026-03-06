@@ -4,5 +4,5 @@ namespace WineClubApi.Data.Repositories;
 
 public interface IResponsibilityRepository
 {
-    Task<IReadOnlyList<UpcomingResponsibilityItem>> GetUpcomingAsync(long householdId, int limit, CancellationToken cancellationToken);
+    Task<IReadOnlyList<UpcomingResponsibilityItem>> GetUpcomingAsync(long userAccountId, long clubId, long householdId, int limit, CancellationToken cancellationToken);
 }

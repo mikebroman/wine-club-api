@@ -18,6 +18,7 @@ public sealed class EventsController(
     {
         var result = await eventRepository.GetNextAsync(
             userContext.UserAccountId,
+            userContext.ClubId,
             new IncludeOptions(include ?? string.Empty),
             cancellationToken);
 
@@ -29,6 +30,7 @@ public sealed class EventsController(
     {
         var result = await eventRepository.GetByIdAsync(
             userContext.UserAccountId,
+            userContext.ClubId,
             eventId,
             new IncludeOptions(include ?? string.Empty),
             cancellationToken);
@@ -39,12 +41,20 @@ public sealed class EventsController(
     [HttpPut("{eventId:long}/my-rsvp")]
     public async Task<IActionResult> PutMyRsvp([FromRoute] long eventId, [FromBody] UpdateMyRsvpRequest request, CancellationToken cancellationToken)
     {
-        var result = await eventRepository.SetMyRsvpAsync(
-            userContext.UserAccountId,
-            eventId,
-            request.Status,
-            cancellationToken);
+        try
+        {
+            var result = await eventRepository.SetMyRsvpAsync(
+                userContext.UserAccountId,
+                userContext.ClubId,
+                eventId,
+                request.Status,
+                cancellationToken);
 
-        return Ok(result);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
     }
 }

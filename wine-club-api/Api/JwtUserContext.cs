@@ -29,4 +29,29 @@ public sealed class JwtUserContext(IHttpContextAccessor httpContextAccessor) : I
             return userAccountId;
         }
     }
+
+    public long ClubId
+    {
+        get
+        {
+            var httpContext = httpContextAccessor.HttpContext;
+            if (httpContext is null)
+            {
+                throw new InvalidOperationException("HTTP context is not available.");
+            }
+
+            var clubIdValue = httpContext.User.FindFirstValue("clubId");
+            if (string.IsNullOrWhiteSpace(clubIdValue))
+            {
+                throw new InvalidOperationException("Missing clubId claim.");
+            }
+
+            if (!long.TryParse(clubIdValue, out var clubId) || clubId <= 0)
+            {
+                throw new InvalidOperationException("Invalid clubId claim.");
+            }
+
+            return clubId;
+        }
+    }
 }
